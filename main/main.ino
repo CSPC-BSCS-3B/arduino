@@ -27,7 +27,7 @@ void loop() {
 
     // Change the threshold here
     if (distance < threshold) {
-        buzz()
+        buzz();
     }
     else {
         delay(100);
