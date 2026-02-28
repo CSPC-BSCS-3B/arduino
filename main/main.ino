@@ -1,43 +1,61 @@
-// Pin numbers
-const int buzzerPin = 11;
-const int trigPin = 9;
-const int echoPin = 10;
+const int TRIG_PIN = 6;
+const int ECHO_PIN = 7;
+const int BUZZER_PIN = 11;
 
-float duration, distance;
+const int MAX_VALID_DISTANCE = 200;
 
-// TODO: Change this to tune distance
-const float threshold = 0.5;
+float duration_us, distance_cm;
 
 void setup() {
-    // put your setup code here, to run once:
-    pinMode(buzzerPin, OUTPUT);
-    pinMode(trigPin, OUTPUT);
-    pinMode(echoPin, INPUT);
+  Serial.begin(9600);
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
+  pinMode(BUZZER_PIN, OUTPUT);
 }
 
 void loop() {
-    // put your main code here, to run repeatedly:
-    digitalWrite(trigPin, LOW);  
-	delayMicroseconds(2);  
-	digitalWrite(trigPin, HIGH);  
-	delayMicroseconds(10);  
-	digitalWrite(trigPin, LOW);  
-    
-    duration = pulseIn(echoPin, HIGH);
-    distance = (duration*.0343)/2;
+  // Trigger ultrasonic pulse
+  digitalWrite(TRIG_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN, LOW);
 
-    // Change the threshold here
-    if (distance < threshold) {
-        buzz();
-    }
-    else {
-        delay(100);
-    }
-}
+  duration_us = pulseIn(ECHO_PIN, HIGH, 30000); // timeout
+  distance_cm = duration_us * 0.017;
 
-void buzz() {
-    digitalWrite(buzzerPin, HIGH);
-    delay(500);
-    digitalWrite(buzzerPin, LOW);
-    delay(500);
+  Serial.print("distance: ");
+  Serial.println(distance_cm);
+
+  // Ignore invalid readings
+  if (distance_cm <= 0 || distance_cm > MAX_VALID_DISTANCE) {
+    noTone(BUZZER_PIN); // silent
+    delay(100);
+    return;
+  }
+
+  // ZONE 1: Very close (0–30 cm) → continuous alarm
+  if (distance_cm <= 30) {
+    tone(BUZZER_PIN, 2000); // high pitch
+  }
+
+  // ZONE 2: Near (31–80 cm) → fast beeping
+  else if (distance_cm <= 80) {
+    tone(BUZZER_PIN, 1500);
+    delay(150);
+    noTone(BUZZER_PIN);
+    delay(150);
+  }
+
+  // ZONE 3: Medium (81–150 cm) → slow beeping
+  else if (distance_cm <= 150) {
+    tone(BUZZER_PIN, 1000);
+    delay(400);
+    noTone(BUZZER_PIN);
+    delay(1600);
+  }
+
+  // ZONE 4: Far (>150 cm) → silent
+  else {
+    noTone(BUZZER_PIN);
+    delay(100);
+  }
 }
