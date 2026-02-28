@@ -5,6 +5,7 @@ const int echoPin = 10;
 
 float duration, distance;
 
+// TODO: Change this to tune distance
 const float threshold = 0.5;
 
 void setup() {
