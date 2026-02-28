@@ -1,11 +1,11 @@
 // Pin numbers
-const int buzzerPin = 8;
+const int buzzerPin = 11;
 const int trigPin = 9;
 const int echoPin = 10;
 
 float duration, distance;
 
-const threshold = 0.5;
+const float threshold = 0.5;
 
 void setup() {
     // put your setup code here, to run once:
@@ -30,7 +30,7 @@ void loop() {
         buzz()
     }
     else {
-        delay(100);s
+        delay(100);
     }
 }
 
